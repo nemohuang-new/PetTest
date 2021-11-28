@@ -17,6 +17,17 @@ export class UserMapper {
         return user;
     }
 
+    static fromDTOstoEntitys(userDTOs: UserDTO[]): User[] {
+        if (!userDTOs) {
+            return;
+        }
+        let users: User[] = new Array();
+        userDTOs.forEach(userDto =>{
+            users.push(this.fromDTOtoEntity(userDto));
+        })
+        return users;
+    }
+
     static fromEntityToDTO(user: User): UserDTO {
         if (!user) {
             return;
@@ -30,5 +41,17 @@ export class UserMapper {
         });
 
         return userDTO;
+    }
+
+    static fromEntitysToDTOs(users: User[]): UserDTO[] {
+        if (!users) {
+            return;
+        }
+
+        const userDTOs = new Array();
+        users.forEach(user =>{
+            userDTOs.push(this.fromEntityToDTO(user))
+        })
+        return userDTOs;
     }
 }

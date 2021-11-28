@@ -53,6 +53,21 @@ export class UserService {
         return UserMapper.fromEntityToDTO(this.flatAuthorities(result));
     }
 
+    async saveList(userDTOs: UserDTO[], creator?: string, updatePassword = false): Promise<UserDTO[] | undefined> {
+        const users = this.convertInAuthoritiesForUsers(UserMapper.fromDTOstoEntitys(userDTOs));
+        userDTOs.forEach(user => function(){
+            if (creator) {
+                if (!user.createdBy) {
+                    user.createdBy = creator;
+                }
+                user.lastModifiedBy = creator;
+            }
+        })
+        const result = await this.userRepository.save(users);
+        return UserMapper.fromEntitysToDTOs(this.flatAuthoritiesForUsers(result));
+    }
+
+
     async update(userDTO: UserDTO, updater?: string): Promise<UserDTO | undefined> {
         return this.save(userDTO, updater);
     }
@@ -72,6 +87,13 @@ export class UserService {
         return user;
     }
 
+    private flatAuthoritiesForUsers(users: User[]): User[] {
+        if (users && users.length >0) {
+            users.forEach(user => this.flatAuthorities(user));
+        }
+        return users
+    }
+
     private convertInAuthorities(user: any): User {
         if (user && user.authorities) {
             const authorities: any[] = [];
@@ -79,5 +101,13 @@ export class UserService {
             user.authorities = authorities;
         }
         return user;
+    }
+
+
+    private convertInAuthoritiesForUsers(users: User[]): User[] {
+        if (users && users.length >0) {
+            users.forEach(user => this.convertInAuthorities(user));
+        }
+        return users;
     }
 }

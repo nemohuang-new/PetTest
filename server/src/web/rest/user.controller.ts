@@ -93,7 +93,7 @@ export class UserController {
         return createdOrUpdated;
     }
 
-    @Get('/:login')
+    @Get('/:username')
     @Roles(RoleType.ADMIN)
     @ApiOperation({ title: 'Get user' })
     @ApiResponse({
@@ -105,7 +105,7 @@ export class UserController {
         return await this.userService.find({ where: { login: loginValue } });
     }
 
-    @Delete('/:login')
+    @Delete('/:username')
     @Roles(RoleType.ADMIN)
     @ApiOperation({ title: 'Delete user' })
     @ApiResponse({
@@ -113,9 +113,24 @@ export class UserController {
         description: 'The record has been successfully deleted.',
         type: UserDTO,
     })
-    async deleteUser(@Req() req: Request, @Param('login') loginValue: string): Promise<UserDTO> {
+    async deleteUser(@Req() req: Request, @Param('username') loginValue: string): Promise<UserDTO> {
         HeaderUtil.addEntityDeletedHeaders(req.res, 'User', loginValue);
         const userToDelete = await this.userService.find({ where: { login: loginValue } });
         return await this.userService.delete(userToDelete);
     }
+
+
+    @Post('/:createWithList')
+    @Roles(RoleType.ADMIN)
+    @ApiOperation({ title: 'Create list of user with given input array' })
+    @ApiResponse({
+        status: 204,
+        description: 'createWithList.',
+        type: UserDTO,
+    })
+    async createWithList(@Req() req: Request, @Body() userDTOs: UserDTO[]): Promise<Array<UserDTO>> {
+        // HeaderUtil.addEntityDeletedHeaders(req.res, 'User', loginValue);
+        return await this.userService.saveList(userDTOs);
+    }
+
 }
