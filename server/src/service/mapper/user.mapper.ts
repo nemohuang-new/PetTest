@@ -21,10 +21,10 @@ export class UserMapper {
         if (!userDTOs) {
             return;
         }
-        let users: User[] = new Array();
-        userDTOs.forEach(userDto =>{
+        const users: User[] = [];
+        userDTOs.forEach(userDto => {
             users.push(this.fromDTOtoEntity(userDto));
-        })
+        });
         return users;
     }
 
@@ -48,10 +48,10 @@ export class UserMapper {
             return;
         }
 
-        const userDTOs = new Array();
-        users.forEach(user =>{
-            userDTOs.push(this.fromEntityToDTO(user))
-        })
+        const userDTOs = [];
+        users.forEach(user => {
+            userDTOs.push(this.fromEntityToDTO(user));
+        });
         return userDTOs;
     }
 }

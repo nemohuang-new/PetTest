@@ -5,6 +5,7 @@ import { ormConfig } from './orm.config';
 import { config } from './config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { OrderModule } from './module/order.module';
+import { StoreModule } from './module/store.module';
 import { TagModule } from './module/tag.module';
 import { CategoryModule } from './module/category.module';
 import { ApiResponseModule } from './module/api-response.module';
@@ -22,13 +23,14 @@ import { PetInventoryModule } from './module/pet-inventory.module';
             rootPath: config.getClientPath(),
         }),
         AuthModule,
-        OrderModule,
-        TagModule,
-        CategoryModule,
-        ApiResponseModule,
+        // OrderModule,
+        // TagModule,
+        // CategoryModule,
+        // ApiResponseModule,
         PetModule,
-        PhotoUrlModule,
-        PetInventoryModule,
+        // PhotoUrlModule,
+        // PetInventoryModule,
+        StoreModule,
         // jhipster-needle-add-entity-module-to-main - JHipster will add entity modules here, do not remove
     ],
     controllers: [

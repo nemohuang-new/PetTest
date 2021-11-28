@@ -51,6 +51,8 @@ export class UserController {
         return results;
     }
 
+
+
     @Post('/')
     @Roles(RoleType.ADMIN)
     @ApiOperation({ title: 'Create user' })
@@ -119,7 +121,6 @@ export class UserController {
         return await this.userService.delete(userToDelete);
     }
 
-
     @Post('/:createWithList')
     @Roles(RoleType.ADMIN)
     @ApiOperation({ title: 'Create list of user with given input array' })
@@ -128,9 +129,8 @@ export class UserController {
         description: 'createWithList.',
         type: UserDTO,
     })
-    async createWithList(@Req() req: Request, @Body() userDTOs: UserDTO[]): Promise<Array<UserDTO>> {
+    async createWithList(@Req() req: Request, @Body() userDTOs: UserDTO[]): Promise<UserDTO[]> {
         // HeaderUtil.addEntityDeletedHeaders(req.res, 'User', loginValue);
         return await this.userService.saveList(userDTOs);
     }
-
 }

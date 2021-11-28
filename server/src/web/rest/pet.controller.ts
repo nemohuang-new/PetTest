@@ -11,6 +11,7 @@ import {
     UseGuards,
     Req,
     UseInterceptors,
+    UploadedFile
 } from '@nestjs/common';
 import { ApiOAuth2Auth, ApiUseTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 import { PetDTO } from '../../service/dto/pet.dto';
@@ -20,16 +21,53 @@ import { AuthGuard, Roles, RolesGuard, RoleType } from '../../security';
 import { HeaderUtil } from '../../client/header-util';
 import { Request } from '../../client/request';
 import { LoggingInterceptor } from '../../client/interceptors/logging.interceptor';
-
-@Controller('api/pets')
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Express } from 'express';
+import { PetInventoryDTO } from 'src/service/dto/pet-inventory.dto';
+@Controller('pet')
 @UseGuards(AuthGuard, RolesGuard)
 @UseInterceptors(LoggingInterceptor, ClassSerializerInterceptor)
 @ApiOAuth2Auth()
-@ApiUseTags('pets')
+@ApiUseTags('pet')
 export class PetController {
     logger = new Logger('PetController');
 
     constructor(private readonly petService: PetService) {}
+
+
+    @UseInterceptors(FileInterceptor('image'))
+    @PostMethod('/:petId/uploadImage')
+    @ApiResponse({
+        status: 200,
+        description: 'List all records',
+        type: PetDTO,
+    })
+    async uploadFile(
+      @Body() body: string,
+      @Param('petId') petId: string,
+      @Req() req: Request,
+      @UploadedFile() file: Express.Multer.File,
+    ) {
+        const response = {
+            originalname: file.originalname,
+            filename: file.filename,
+        };
+        console.log(response);
+        HeaderUtil.addEntityCreatedHeaders(req.res, 'Pet', petId);
+        this.logger.log('fileUpload')
+        let petDTO = await this.petService.findById(parseInt(petId));
+        petDTO.file = file.buffer.toString();
+        return await this.petService.update(petDTO, req.user?.login);
+    }
+
+
+    @Get('/')
+    @Roles(RoleType.USER)
+    @ApiResponse({
+        status: 200,
+        description: 'List all records',
+        type: PetDTO,
+    })
 
     @Get('/')
     @Roles(RoleType.USER)
@@ -100,6 +138,19 @@ export class PetController {
         HeaderUtil.addEntityCreatedHeaders(req.res, 'Pet', petDTO.id);
         return await this.petService.update(petDTO, req.user?.login);
     }
+
+    @Get('/findByStatus/:status')
+    @Roles(RoleType.ADMIN)
+    @ApiOperation({ title: 'Get user' })
+    @ApiResponse({
+        status: 200,
+        description: 'The found record',
+        type: PetDTO,
+    })
+    async getUser(@Param('status') status: string): Promise<PetDTO> {
+        return await this.petService.find({ where: { status: status } });
+    }
+
 
     @Delete('/:id')
     @Roles(RoleType.ADMIN)

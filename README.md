@@ -197,3 +197,9 @@ For more information, refer to the [Code quality page][].
 [protractor]: https://angular.github.io/protractor/
 [leaflet]: http://leafletjs.com/
 [definitelytyped]: http://definitelytyped.org/
+
+#Add a new contrller step without import.
+
+1. Add the contrller file
+2. Add module
+3. Add in the app.modules.ts

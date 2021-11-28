@@ -36,6 +36,12 @@ export class PetService {
         return resultList;
     }
 
+    async find(options: FindManyOptions<PetDTO>): Promise<PetDTO | undefined> {
+        const result = await this.petRepository.findOne(options);
+        this.logger.log('ppppppppppp' + result);
+        return PetMapper.fromEntityToDTO(result);
+    }
+
     async save(petDTO: PetDTO, creator?: string): Promise<PetDTO | undefined> {
         const entity = PetMapper.fromDTOtoEntity(petDTO);
         if (creator) {
