@@ -24,6 +24,7 @@ import { LoggingInterceptor } from '../../client/interceptors/logging.intercepto
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Express } from 'express';
 import { PetInventoryDTO } from 'src/service/dto/pet-inventory.dto';
+
 @Controller('pet')
 @UseGuards(AuthGuard, RolesGuard)
 @UseInterceptors(LoggingInterceptor, ClassSerializerInterceptor)
@@ -33,9 +34,10 @@ export class PetController {
     logger = new Logger('PetController');
 
     constructor(private readonly petService: PetService) {}
-
-
-    @UseInterceptors(FileInterceptor('image'))
+    
+    @UseInterceptors(FileInterceptor('file', {
+        dest: './uploadFiles'
+      }))
     @PostMethod('/:petId/uploadImage')
     @ApiResponse({
         status: 200,
@@ -43,11 +45,13 @@ export class PetController {
         type: PetDTO,
     })
     async uploadFile(
-      @Body() body: string,
       @Param('petId') petId: string,
       @Req() req: Request,
       @UploadedFile() file: Express.Multer.File,
     ) {
+        console.log("fffff"+file);
+        this.logger.warn("mmmmm");
+        this.logger.warn("ile.path"+file.path);
         const response = {
             originalname: file.originalname,
             filename: file.filename,
@@ -56,18 +60,11 @@ export class PetController {
         HeaderUtil.addEntityCreatedHeaders(req.res, 'Pet', petId);
         this.logger.log('fileUpload')
         let petDTO = await this.petService.findById(parseInt(petId));
-        petDTO.file = file.buffer.toString();
+        petDTO.file = file.buffer? file.buffer.toString():null;
+        petDTO.photoUrls = file.path;
         return await this.petService.update(petDTO, req.user?.login);
     }
 
-
-    @Get('/')
-    @Roles(RoleType.USER)
-    @ApiResponse({
-        status: 200,
-        description: 'List all records',
-        type: PetDTO,
-    })
 
     @Get('/')
     @Roles(RoleType.USER)
@@ -83,6 +80,9 @@ export class PetController {
             take: +pageRequest.size,
             order: pageRequest.sort.asOrder(),
         });
+
+        console.log("listAll");
+        this.logger.warn("listAll warm");
         HeaderUtil.addPaginationHeaders(req.res, new Page(results, count, pageRequest));
         return results;
     }
